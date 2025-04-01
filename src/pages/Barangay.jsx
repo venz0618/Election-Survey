@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import DataTable from "react-data-table-component";
 import axiosInstance from "../utils/axiosInstance";
 const Barangay = () => {
     const [barangays, setBarangays] = useState([]);
@@ -9,6 +9,7 @@ const Barangay = () => {
     const [barangayStatus, setBarangayStatus] = useState(0);
     const [editingBarangay, setEditingBarangay] = useState(null);
     const [showModal, setShowModal] = useState(false);
+     const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
 
     useEffect(() => {
         fetchBarangays();
@@ -93,6 +94,50 @@ const Barangay = () => {
         }
     };
 
+    const columns = [
+        {
+            name: "Barangay Name",
+            selector: (row) => row.barangay_name,
+            sortable: true,
+        },
+
+        {
+            name: "City Name",
+            selector: (row) => cities.find(city => city.id === row.city_id)?.city_name || "Unknown",
+            sortable: true,
+        },
+        {
+            name: "Status",
+            selector: (row) => row.barangay_status === 1 ? "Active" : "Inactive",
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row) => (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => openModal(row)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                        Edit
+                    </button>
+    
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+        }
+    ];
+
+     // ✅ Filter voters based on search input
+     const filteredBarangay = barangays.filter((barangay) =>
+        barangay.barangay_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Barangays</h1>
@@ -103,45 +148,23 @@ const Barangay = () => {
             </button>
 
             {/* Barangays Table */}
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">Barangay Name</th>
-                        <th className="border border-gray-300 p-2">City</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {barangays.map((barangay) => (
-                        <tr key={barangay.id}>
-                            <td className="border border-gray-300 p-2">{barangay.id}</td>
-                            <td className="border border-gray-300 p-2">{barangay.barangay_name}</td>
-                            <td className="border border-gray-300 p-2">
-                            {cities.find(city => city.id === barangay.city_id)?.city_name || "Unknown"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                {barangay.barangay_status ? "Active" : "Inactive"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button
-                                    onClick={() => openModal(barangay)}
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(barangay.id)}
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+         
+             {/* ✅ Search Bar */}
+                <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            <DataTable
+                    columns={columns}
+                    data={filteredBarangay} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
 
             {/* Add/Edit Modal */}
             {showModal && (

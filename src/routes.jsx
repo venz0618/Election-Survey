@@ -148,6 +148,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserLayout from "./layouts/UserLayout";
 import UserDashboard from "./user/pages/UserDashboard";
 import PublicRoute from "./components/PublicRoute";
+import Survey from "./user/pages/Survey";
 
 
 
@@ -158,6 +159,7 @@ const AppRoutes = () => {
                 {/* ✅ Public User Routes (No Login Required) */}
                 <Route path="/user" element={<UserLayout />}>
                     <Route index element={<UserDashboard />} />
+                    
                 </Route>
 
                 {/* ✅ Public Route (Login Page Redirects Logged-In Users) */}
@@ -179,6 +181,7 @@ const AppRoutes = () => {
 
                 {/* ✅ Catch-All Route (Redirect Unknown Routes to Home) */}
                 <Route path="*" element={<Navigate to="/user" replace />} />
+                <Route path="/survey" element={<Survey />} />
             </Routes>
         </AuthProvider>
     );

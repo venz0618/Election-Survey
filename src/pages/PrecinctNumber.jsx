@@ -9,6 +9,24 @@ const PrecinctNumber = () => {
     const [editingPrecinct, setEditingPrecinct] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    //For Table
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(precincts.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = precincts.slice(indexOfFirstItem, indexOfLastItem);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+      };
+    
+      const prevPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+      };
+
     useEffect(() => {
         fetchPrecincts();
         fetchClusteredPrecincts();
@@ -54,12 +72,12 @@ const PrecinctNumber = () => {
         e.preventDefault();
         try {
             if (editingPrecinct) {
-                await axiosInstance.put(`/precinct-numbers/${editingPrecinct.id}`, {
+                await axiosInstance.put(`/precincts/${editingPrecinct.id}`, {
                     precinct_num: precinctNum,
                     clustered_precinct_id: clusteredPrecinctId,
                 });
             } else {
-                await axiosInstance.post("/precinct-numbers", {
+                await axiosInstance.post("/precincts", {
                     precinct_num: precinctNum,
                     clustered_precinct_id: clusteredPrecinctId,
                 });
@@ -74,7 +92,7 @@ const PrecinctNumber = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this precinct number?")) {
             try {
-                await axiosInstance.delete(`/precinct-numbers/${id}`);
+                await axiosInstance.delete(`/precincts/${id}`);
                 fetchPrecincts();
             } catch (error) {
                 console.error("Error deleting precinct:", error);
@@ -90,35 +108,52 @@ const PrecinctNumber = () => {
                 + Add Precinct Number
             </button>
 
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">Precinct Number</th>
-                        <th className="border border-gray-300 p-2">Clustered Precinct</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {precincts.map((precinct) => (
-                        <tr key={precinct.id}>
-                            <td className="border border-gray-300 p-2">{precinct.id}</td>
-                            <td className="border border-gray-300 p-2">{precinct.precinct_num}</td>
-                            <td className="border border-gray-300 p-2">
-                            {clusteredPrecincts.find(cp => cp.id === precinct.clustered_precinct_id)?.clustered_precinct_num || "Unknown"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button onClick={() => openModal(precinct)} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">
-                                    Edit
-                                </button>
-                                <button onClick={() => handleDelete(precinct.id)} className="bg-red-500 text-white px-2 py-1 rounded">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300 bg-whte-800 text-back">
+          <thead>
+            <tr className="bg-gray-200">
+              
+              <th className="border border-gray-600 p-2">Precinct Number</th>
+              <th className="border border-gray-600 p-2">Clustered Precinct</th>
+              <th className="border border-gray-600 p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((precinct) => (
+              <tr key={precinct.id} className="hover:bg-gray-300">
+            
+                <td className="border border-gray-600 p-2">{precinct.precinct_num}</td>
+                <td className="border border-gray-600 p-2">
+                  {clusteredPrecincts.find(cp => cp.id === precinct.clustered_precinct_id)?.clustered_precinct_num || "Unknown"}
+                </td>
+                <td className="border border-gray-600 p-2 flex gap-2">
+                  <button 
+                    onClick={() => openModal(precinct)} 
+                    className="bg-yellow-500 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(precinct.id)} 
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between items-center mt-4">
+        <button onClick={prevPage} disabled={currentPage === 1} className="bg-gray-600 px-3 py-1 rounded disabled:opacity-50">
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button onClick={nextPage} disabled={currentPage === totalPages} className="bg-gray-600 px-3 py-1 rounded disabled:opacity-50">
+          Next
+        </button>
+      </div>
 
             {showModal && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">

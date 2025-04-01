@@ -17,7 +17,7 @@ const UserDashboard = () => {
     }, []);
 
     return (
-        <div className="container text-white p-4 bg-gray-600 rounded">
+        <div className="container text-black p-4 bg-gray-600 rounded">
             <h1 className="text-3xl font-bold">Election Survey System</h1>
             <p className="text-gray-300">
                 Track voter preferences and electoral trends across different regions.
