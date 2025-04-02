@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 const UserDashboard = () => {
     const [stats, setStats] = useState({
@@ -11,7 +11,7 @@ const UserDashboard = () => {
     });
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/api/dashboard-stats")
+        axiosInstance.get("/dashboard-stats")
             .then(response => setStats(response.data))
             .catch(error => console.error("Error fetching dashboard stats:", error));
     }, []);
@@ -34,7 +34,7 @@ const UserDashboard = () => {
 
             <div className="grid grid-cols-4 gap-4 mt-6">
                 <div className="bg-purple-500 p-4 rounded text-center">
-                    <h3 className="text-xl">{stats.totalVoters}</h3>
+                    <h3 className="text-xl">{stats.total_voters}</h3>
                     <p>Total Voters</p>
                 </div>
                 <div className="bg-green-500 p-4 rounded text-center">

@@ -149,6 +149,7 @@ import UserLayout from "./layouts/UserLayout";
 import UserDashboard from "./user/pages/UserDashboard";
 import PublicRoute from "./components/PublicRoute";
 import Survey from "./user/pages/Survey";
+import VoteResult from "./user/pages/VoteResult";
 
 
 
@@ -159,9 +160,10 @@ const AppRoutes = () => {
                 {/* ✅ Public User Routes (No Login Required) */}
                 <Route path="/user" element={<UserLayout />}>
                     <Route index element={<UserDashboard />} />
-                    
+                    <Route path="survey" element={<Survey />} />
+                    <Route path="result" element={<VoteResult/>} />
                 </Route>
-
+                <Route path="survey" element={<Survey />} />
                 {/* ✅ Public Route (Login Page Redirects Logged-In Users) */}
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
@@ -181,7 +183,7 @@ const AppRoutes = () => {
 
                 {/* ✅ Catch-All Route (Redirect Unknown Routes to Home) */}
                 <Route path="*" element={<Navigate to="/user" replace />} />
-                <Route path="/survey" element={<Survey />} />
+                
             </Routes>
         </AuthProvider>
     );

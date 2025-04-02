@@ -604,7 +604,7 @@ const Survey = () => {
              <div className="bg-white shadow-md rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-black-700 mb-4">Filtered Voters</h3>
                 <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                     className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700 transitionp mb-3"
                     onClick={handleSubmitVotes}
                 >
                     Submit Votes

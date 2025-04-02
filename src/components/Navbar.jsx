@@ -12,8 +12,8 @@ const Navbar = () => {
         
         <div className="hidden md:flex space-x-6">
           <Link to="/dashboard" className="hover:text-gray-300">Home</Link>
-          <Link to="/survey" className="hover:text-gray-300">Survey</Link>
-          <Link to="/voters" className="hover:text-gray-300">Result</Link>
+          <Link to="/user/survey" className="hover:text-gray-300">Survey</Link>
+          <Link to="/user/result" className="hover:text-gray-300">Result</Link>
           <Link to="/login" className="hover:text-gray-300">Admin</Link>
         </div>
         
@@ -25,8 +25,8 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-blue-700 p-4 flex flex-col space-y-4">
           <Link to="/dashboard" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Home</Link>
-          <Link to="/survey" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Survey</Link>
-          <Link to="/voters" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Result</Link>
+          <Link to="/user/survey" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Survey</Link>
+          <Link to="/user/result" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Result</Link>
           <Link to="/login" className="hover:text-gray-300" onClick={() => setIsOpen(false)}>Admin</Link>
         </div>
       )}
