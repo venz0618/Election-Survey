@@ -446,12 +446,14 @@ const columns = [
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Voters Management</h1>
-
+            <div className="flex gap-4">
             <button onClick={() => openModal()} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
                 + Add Voter
             </button>
 
-            <button onClick={openBulkModal} className="px-4 py-2 bg-green-600 text-white rounded-md">Bulk Add Voters</button>
+            <button onClick={openBulkModal} className="bg-green-500 text-white px-4 py-2 rounded mb-4" >Bulk Add Voters</button>
+            </div>
+           
 
 
                 <DataTable

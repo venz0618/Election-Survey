@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 
 const Dashboard = () => {
-   const [stats, setStats] = useState({ total_voters: 0, total_candidates: 0, total_precincts: 0 });
+   const [stats, setStats] = useState({ total_voters: 0, total_candidates: 0, total_precincts: 0 , total_voted: 0});
 
     useEffect(() => {
         const fetchStats = async () => {

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
-
+import DataTable from "react-data-table-component";
 const Region = () => {
     const [regions, setRegions] = useState([]);
     const [regionName, setRegionName] = useState("");
     const [regionStatus, setRegionStatus] = useState(0);
     const [editingRegion, setEditingRegion] = useState(null);
     const [showModal, setShowModal] = useState(false); // Control modal visibility
-
+    const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
     useEffect(() => {
         fetchRegions();
     }, []);
@@ -78,6 +78,43 @@ const Region = () => {
         }
     };
 
+    const columns = [
+        {
+            name: "Region",
+            selector: (row) => row.region_name,
+            sortable: true,
+        },
+        {
+            name: "Status",
+            selector: (row) => row.region_status === 1 ? "Active" : "Inactive",
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row) => (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => openModal(row)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                        Edit
+                    </button>
+    
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+        }
+    ];
+   // ✅ Filter voters based on search input
+   const filteredRegion = regions.filter((p) =>
+    p.region_name.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Regions</h1>
@@ -88,7 +125,7 @@ const Region = () => {
             </button>
 
             {/* Regions Table */}
-            <table className="w-full border-collapse border border-gray-300">
+            {/* <table className="w-full border-collapse border border-gray-300">
                 <thead>
                     <tr className="bg-gray-200">
                         <th className="border border-gray-300 p-2">ID</th>
@@ -122,7 +159,25 @@ const Region = () => {
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </table> */}
+
+
+            {/* ✅ Search Bar */}
+            <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            <DataTable
+                    columns={columns}
+                    data={filteredRegion} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
 
             {/* Add/Edit Modal */}
             {showModal && (

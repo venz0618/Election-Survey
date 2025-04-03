@@ -68,6 +68,12 @@ const Barangay = () => {
                     city_id: cityId,
                     barangay_status: barangayStatus,
                 });
+                 Swal.fire({
+                                icon: "success",
+                                title: "Success!",
+                                text: "Barangay Edited successfully!",
+                                confirmButtonColor: "#4CAF50", // Green button
+                            });
             } else {
                 await axiosInstance.post("/barangays", {
                     barangay_name: barangayName,
@@ -75,6 +81,12 @@ const Barangay = () => {
                     barangay_status: barangayStatus,
                 });
             }
+             Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: "Barangay Added successfully!",
+                            confirmButtonColor: "#4CAF50", // Green button
+                        });
             fetchBarangays();
             closeModal();
         } catch (error) {
@@ -91,6 +103,12 @@ const Barangay = () => {
             } catch (error) {
                 console.error("Error deleting barangay:", error);
             }
+             Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: "Barangay Deleted successfully!",
+                            confirmButtonColor: "#4CAF50", // Green button
+                        });
         }
     };
 
@@ -150,7 +168,7 @@ const Barangay = () => {
             {/* Barangays Table */}
          
              {/* ✅ Search Bar */}
-                <input
+             <input
                     type="text"
                     placeholder="Search voter name..."
                     className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"

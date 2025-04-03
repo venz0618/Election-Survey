@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import DataTable from "react-data-table-component";
 import axiosInstance from "../utils/axiosInstance";
 const City = () => {
     const [cities, setCities] = useState([]);
@@ -9,7 +9,7 @@ const City = () => {
     const [cityStatus, setCityStatus] = useState(0);
     const [editingCity, setEditingCity] = useState(null);
     const [showModal, setShowModal] = useState(false);
-
+    const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
     useEffect(() => {
         fetchCities();
         fetchProvinces(); // Fetch provinces
@@ -67,6 +67,12 @@ const City = () => {
                     province_id: provinceId,
                     city_status: cityStatus,
                 });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "City Edited successfully!",
+                    confirmButtonColor: "#4CAF50", // Green button
+                });
             } else {
                 await axiosInstance.post("/cities", {
                     city_name: cityName,
@@ -74,6 +80,12 @@ const City = () => {
                     city_status: cityStatus,
                 });
             }
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "City Added successfully!",
+                confirmButtonColor: "#4CAF50", // Green button
+            });
             fetchCities();
             closeModal();
         } catch (error) {
@@ -90,8 +102,59 @@ const City = () => {
             } catch (error) {
                 console.error("Error deleting city:", error);
             }
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "City Deleted successfully!",
+                confirmButtonColor: "#4CAF50", // Green button
+            });
         }
     };
+
+
+    const columns = [
+        {
+            name: "City",
+            selector: (row) => row.city_name,
+            sortable: true,
+        },
+
+        {
+            name: "Province",
+            selector: (row) => provinces.find(province => province.id === row.province_id)?.province_name || "Unknown",
+            sortable: true,
+        },
+
+        {
+            name: "Status",
+            selector: (row) => row.city_status === 1 ? "Active" : "Inactive",
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row) => (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => openModal(row)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                        Edit
+                    </button>
+    
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+        }
+    ];
+   // ✅ Filter voters based on search input
+   const filteredCity = cities.filter((p) =>
+    p.city_name.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
     return (
         <div className="p-6">
@@ -103,45 +166,23 @@ const City = () => {
             </button>
 
             {/* Cities Table */}
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">City Name</th>
-                        <th className="border border-gray-300 p-2">Province</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {cities.map((city) => (
-                        <tr key={city.id}>
-                            <td className="border border-gray-300 p-2">{city.id}</td>
-                            <td className="border border-gray-300 p-2">{city.city_name}</td>
-                            <td className="border border-gray-300 p-2">
-                            {provinces.find(province => province.id === city.province_id)?.province_name || "Unknown"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                {city.city_status ? "Active" : "Inactive"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button
-                                    onClick={() => openModal(city)}
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(city.id)}
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                {/* ✅ Search Bar */}
+             <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            <DataTable
+                    columns={columns}
+                    data={filteredCity} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
+
 
             {/* Add/Edit Modal */}
             {showModal && (

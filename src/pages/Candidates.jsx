@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
+import DataTable from "react-data-table-component";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 const Candidates = () => {
     const [candidates, setCandidates] = useState([]);
@@ -11,6 +13,7 @@ const Candidates = () => {
     const [positionId, setPositionId] = useState("");
     const [provinceId, setProvinceId] = useState("");
     const [candidateStatus, setCandidateStatus] = useState(1);
+    const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
 
 
 
@@ -82,8 +85,13 @@ const Candidates = () => {
                     province_id: provinceId,
                     candidate_status: candidateStatus,
                 },
-            )
-                ;
+            );
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Candidate Edited successfully!",
+                confirmButtonColor: "#4CAF50", // Green button
+            });
             } else {
                 await axiosInstance.post("/candidates", {
                     candidate_name: candidateName,
@@ -94,7 +102,12 @@ const Candidates = () => {
             
             );
             }
-
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Candidate added successfully!",
+                    confirmButtonColor: "#4CAF50", // Green button
+                });
             fetchCandidates();
             closeModal();
         } catch (error) {
@@ -103,13 +116,76 @@ const Candidates = () => {
     };
 
     const handleDelete = async (id) => {
-        try {
-            await axiosInstance.delete(`/candidates/${id}`);
-            fetchCandidates();
-        } catch (error) {
-            console.error("Error deleting candidate:", error);
-        }
+        if(window.confirm("Are you ure you want to delete this?")){
+                        try {
+                            await axiosInstance.delete(`/candidates/${id}`);
+                            fetchCandidates();
+                        } catch (error) {
+                            console.error("Error deleting candidate:", error);
+                        }
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: "Candidate deleted successfully!",
+                            confirmButtonColor: "#4CAF50", // Green button
+                        });
+                    }
+                    
+       
     };
+
+
+    const columns = [
+      {  
+        name: "Name",
+        selector: (row) => row.candidate_name,
+        sortable: true,
+
+      },
+
+      {
+        name: "Position",
+        selector: (row) => row.position?.position_type || "Unknown",
+        sortable: true,
+      },
+
+      {
+        name: "Province",
+        selector: (row) => row.province?.province_name || "Unknown",
+        sortable: true,
+      },
+
+      {
+        name: "Status",
+        selector: (row) => row.candidate_status === 1 ? "Active" : "Inactive",
+      },
+
+      {
+        name: "Actions",
+        cell: (row) => (
+            <div className="flex gap-2">
+                <button
+                    onClick={() => openModal(row)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded"
+                >
+                    Edit
+                </button>
+
+                <button
+                    onClick={() => handleDelete(row.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                >
+                    Delete
+                </button>
+            </div>
+        ),
+      }
+    
+    ];
+       // ✅ Filter voters based on search input
+       const filteredCandidate = candidates.filter((candidate) =>
+        candidate.candidate_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="p-6">
@@ -118,37 +194,22 @@ const Candidates = () => {
                 + Add Candidate
             </button>
 
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">Name</th>
-                        <th className="border border-gray-300 p-2">Position</th>
-                        <th className="border border-gray-300 p-2">Province</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {candidates.map((candidate) => (
-                        <tr key={candidate.id}>
-                            <td className="border border-gray-300 p-2">{candidate.candidate_name}</td>
-                            <td className="border border-gray-300 p-2">{candidate.position?.position_type || "Unknown"}</td>
-                            <td className="border border-gray-300 p-2">{candidate.province?.province_name || "Unknown"}</td>
-                            <td className="border border-gray-300 p-2">
-                                {candidate.candidate_status === 1 ? "Active" : "Inactive"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button onClick={() => openModal(candidate)} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">
-                                    Edit
-                                </button>
-                                <button onClick={() => handleDelete(candidate.id)} className="bg-red-500 text-white px-2 py-1 rounded">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+
+                    <DataTable
+                    columns={columns}
+                    data={filteredCandidate} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
 
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

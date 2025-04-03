@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
-
+import DataTable from "react-data-table-component";
 
 const Province = () => {
     const [provinces, setProvinces] = useState([]);
@@ -10,7 +10,7 @@ const Province = () => {
     const [provinceStatus, setProvinceStatus] = useState(0);
     const [editingProvince, setEditingProvince] = useState(null);
     const [showModal, setShowModal] = useState(false); 
-
+    const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
     useEffect(() => {
         fetchProvinces();
         fetchRegions();
@@ -96,6 +96,50 @@ const Province = () => {
         }
     };
 
+    const columns = [
+        {
+            name: "Province",
+            selector: (row) => row.region_name,
+            sortable: true,
+        },
+
+        {
+            name: "Region",
+            selector: (row) => regions.find(region => region.id === row.region_id)?.region_name || "Unknown",
+            sortable: true,
+        },
+
+        {
+            name: "Status",
+            selector: (row) => row.region_status === 1 ? "Active" : "Inactive",
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row) => (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => openModal(row)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                        Edit
+                    </button>
+    
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+        }
+    ];
+   // ✅ Filter voters based on search input
+   const filteredRegion = regions.filter((p) =>
+    p.region_name.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">Provinces</h1>
@@ -106,45 +150,22 @@ const Province = () => {
             </button>
 
             {/* Provinces Table */}
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">Name</th>
-                        <th className="border border-gray-300 p-2">Region</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {provinces.map((province) => (
-                        <tr key={province.id}>
-                            <td className="border border-gray-300 p-2">{province.id}</td>
-                            <td className="border border-gray-300 p-2">{province.province_name}</td>
-                            <td className="border border-gray-300 p-2">
-                                {regions.find(region => region.id === province.region_id)?.region_name || "Unknown"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                {province.province_status ? "Active" : "Inactive"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button
-                                    onClick={() => openModal(province)}
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(province.id)}
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {/* ✅ Search Bar */}
+                <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            <DataTable
+                    columns={columns}
+                    data={filteredRegion} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
 
             {/* Add/Edit Modal */}
             {showModal && (

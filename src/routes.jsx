@@ -163,7 +163,7 @@ const AppRoutes = () => {
                     <Route path="survey" element={<Survey />} />
                     <Route path="result" element={<VoteResult/>} />
                 </Route>
-                <Route path="survey" element={<Survey />} />
+              
                 {/* ✅ Public Route (Login Page Redirects Logged-In Users) */}
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 

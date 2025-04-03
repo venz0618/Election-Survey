@@ -1,36 +1,40 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../utils/axiosInstance";
+import useFilters from "../../utils/useFilters";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2"; // Import SweetAlert2
 
 
 const Survey = () => {
-    const [regions, setRegions] = useState([]);
-    const [provinces, setProvinces] = useState([]);
-    const [cities, setCities] = useState([]);
-    const [barangays, setBarangays] = useState([]);
-    const [clusteredPrecincts, setClusteredPrecincts] = useState([]);
-    const [precinctNumbers, setPrecinctNumbers] = useState([]);
+ 
+ const {
+        regions, positions, candidates,provinces,barangays,cities,clusteredPrecincts,precinctNumbers,
+        regionId, setRegionId,
+        provinceId, setProvinceId,
+        cityId, setCityId,
+        barangayId, setBarangayId,
+        clusteredPrecinctId, setClusteredPrecinctId,
+        precinctNumId, setPrecinctNumId,
+        selectedPosition, setSelectedPosition,
+        fetchProvince,
+        fetchRegions,
+        fetchCities,fetchBarangays,
+        fetchClusteredPrecincts,
+        fetchPrecincts,
+        fetchCandidates
+    } = useFilters();
+
+    // useEffect(() => {
+    //         axiosInstance.get("/voted-voters").then((response) => {
+    //             setVotedVoters(response.data.votedVoters); // Assuming API returns a list of voted voter IDs
+    //         });
+    //     }, []);
+
     const [voters, setVoters] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
 
     // select candidate and position
-    const [positions, setPositions] = useState([]);
-    const [candidates, setCandidates] = useState([]);
-    const [selectedPosition, setSelectedPosition] = useState("");
 
-    const [regionId, setRegionId] = useState("");
-    const [provinceId, setProvinceId] = useState("");
-    const [cityId, setCityId] = useState("");
-    const [barangayId, setBarangayId] = useState("");
-    const [precinctNumId, setPrecinctNumId] = useState("");
-    const [clusteredPrecinctId, setClusteredPrecinctId] = useState("");
-    // const [voterName, setVoterName] = useState("");
-    // const [voterStatus, setVoterStatus] = useState(0);
-
-    const [positionId, setPositionId] = useState("");
-    const [candidateId, setCandidateId] = useState("");
-    const [selectedVoters, setSelectedVoters] = useState([]); // Track checked voters
     const [selectedVotes, setSelectedVotes] = useState([]);
     const [votedVoters, setVotedVoters] = useState([]);
 
@@ -44,175 +48,6 @@ const Survey = () => {
     };
     
 
-
- 
-    // useEffect(() => {
-    //     fetchPositions(); // Load positions for candidate selection
-    // }, []);
-
-    useEffect(() => {
-        // Fetch all positions
-        axiosInstance.get("/positions").then((response) => {
-            setPositions(response.data);
-        });
-    }, []);
-
-    useEffect(() => {
-        // Fetch candidates based on selected position
-        if (selectedPosition) {
-            axiosInstance
-                .get(`/candidates-filter?position_id=${selectedPosition}`)
-                .then((response) => {
-                    setCandidates(response.data);
-                });
-        }
-    }, [selectedPosition]); // Runs when selectedPosition changes
-
-    useEffect(() => {
-        axiosInstance.get("/voted-voters").then((response) => {
-            setVotedVoters(response.data.votedVoters); // Assuming API returns a list of voted voter IDs
-        });
-    }, []);
-    
-
-    useEffect(() => {
-        fetchRegions();
-    }, []); // ✅ Only fetch once
-    
-    useEffect(() => {
-        if (regionId) fetchProvince(regionId);
-    }, [regionId]);
-    
-    useEffect(() => {
-        if (provinceId) fetchCities(provinceId);
-    }, [provinceId]);
-    
-    useEffect(() => {
-        if (cityId) fetchBarangays(cityId);
-    }, [cityId]);
-    
-    useEffect(() => {
-        if (barangayId) fetchClusteredPrecincts(barangayId);
-    }, [barangayId]);
-    
-    useEffect(() => {
-        if (clusteredPrecinctId) fetchPrecincts(clusteredPrecinctId);
-    }, [clusteredPrecinctId]);
-    
-
-    
-    
-
-    const fetchRegions = async () => {
-        const cachedRegions = sessionStorage.getItem("regions");
-    
-        if (cachedRegions) {
-            setRegions(JSON.parse(cachedRegions));
-            return;
-        }
-    
-        try {
-            const response = await axiosInstance.get("/regions");
-            setRegions(response.data);
-            sessionStorage.setItem("regions", JSON.stringify(response.data)); // Save to cache
-        } catch (error) {
-            console.error("Error fetching regions:", error);
-        }
-    };
-    
-    
-
-    const fetchProvince = async (regionId) => {
-        if(!regionId) {
-            setProvinces([]);
-            return;
-        }
-        try {
-            const response = await axiosInstance.get(`/provinces?region_id=${regionId}`);
-            setProvinces(response.data);
-        } catch (error){
-            console.error("Error fetching provinces:", error);
-        }
-    };
-
-    const fetchCities = async (provinceId) => {
-        if(!provinceId){
-            setCities([]);
-            return;
-        }
-        try {
-            const response = await axiosInstance.get(`cities?province_id=${provinceId}`);
-            setCities(response.data);
-        }catch (error){
-            console.error("Error fetching cities:", error);
-        }
-    };
-
-    const fetchBarangays = async (cityId) => {
-        if (!cityId) {
-            setBarangays([]); // Clear barangays if no city selected
-            return;
-        }
-    
-        try {
-            const response = await axiosInstance.get(`/barangays?city_id=${cityId}`);
-            setBarangays(response.data);
-        } catch (error) {
-            console.error("Error fetching barangays:", error);
-        }
-    };
-    const fetchClusteredPrecincts = async (barangayId) => {
-        if (!barangayId) {
-            setClusteredPrecincts([]);
-        }
-
-        try{
-            const response = await axiosInstance.get(`/clustered-precincts?barangay_id=${barangayId}`);
-            setClusteredPrecincts(response.data);
-        } catch(error){
-            console.error("Error fetching clustered precinct:", error);
-        }
-    };
-
-    const fetchPrecincts = async (clustered_precinct_id) => {
-        if (!clustered_precinct_id) {
-            console.warn("No clustered_precinct_id provided, skipping request.");
-            return; // Exit function early to avoid 404 error
-        }
-    
-        try {
-            console.log("Fetching precincts for clustered_precinct_id:", clustered_precinct_id);
-            const response = await axiosInstance.get(`/precincts?clustered_precinct_id=${clustered_precinct_id}`);
-    
-            if (Array.isArray(response.data)) {
-                setPrecinctNumbers(response.data);
-            } else {
-                console.error("Invalid precinct data received:", response.data);
-                setPrecinctNumbers([]);
-            }
-        } catch (error) {
-            console.error("Error fetching precincts:", error);
-            setPrecinctNumbers([]);
-        }
-    };
-
-    // const fetchPositions = async () => {
-    //     try {
-    //         const response = await axiosInstance.get("/positions");
-    //         setPositions(response.data);
-    //     } catch (error) {
-    //         console.error("Error fetching positions:", error);
-    //     }
-    // };
-
-    // const fetchCandidates = async (positionId) => {
-    //     try {
-    //         const response = await axiosInstance.get(`/candidates?position_id=${positionId}`);
-    //         setCandidates(response.data);
-    //     } catch (error) {
-    //         console.error("Error fetching candidates:", error);
-    //     }
-    // };
     
     
     const fetchVoters = async () => {
@@ -237,70 +72,134 @@ const Survey = () => {
     };
 
 
-    //
+  
     // const handleCandidateSelection = (voterId, candidateId) => {
+    //     setSelectedVotes((prev) => ({
+    //         ...prev,
+    //         [voterId]: prev[voterId] === candidateId ? null : candidateId, // Toggle selection
+    //     }));
+    // };
+    // const handleCandidateSelection = (voterId, candidateId, positionId) => {
+    //     const position = positions.find(p => p.id === positionId);
+    //     const maxVotes = position?.max_votes || 1; // Default to 1 if not found
+    
     //     setSelectedVotes((prev) => {
-    //         const updatedVotes = { ...prev };
-    //         if (!updatedVotes[voterId]) {
-    //             updatedVotes[voterId] = [];
+    //         const existingVotes = prev[voterId] || [];
+    
+    //         // Check if already selected
+    //         if (existingVotes.includes(candidateId)) {
+    //             return { ...prev, [voterId]: existingVotes.filter(id => id !== candidateId) };
     //         }
-
-    //         if (updatedVotes[voterId].includes(candidateId)) {
-    //             updatedVotes[voterId] = updatedVotes[voterId].filter((id) => id !== candidateId);
-    //         } else {
-    //             updatedVotes[voterId].push(candidateId);
+    
+    //         // Limit selections if max_votes is reached
+    //         if (existingVotes.length < maxVotes) {
+    //             return { ...prev, [voterId]: [...existingVotes, candidateId] };
     //         }
-
-    //         return updatedVotes;
+    
+    //         return prev; // No change if max reached
     //     });
     // };
+    
 
-    const handleCandidateSelection = (voterId, candidateId) => {
-        setSelectedVotes((prev) => ({
-            ...prev,
-            [voterId]: prev[voterId] === candidateId ? null : candidateId, // Toggle selection
-        }));
+    const handleCandidateSelection = (voterId, candidateId, positionId) => {
+        setSelectedVotes((prev) => {
+            const voterVotes = prev[voterId] || {}; // Ensure voter has a record
+            const positionVotes = voterVotes[positionId] || []; // Votes under the position
+            const position = positions.find((p) => p.id === positionId);
+            const maxVotes = position?.max_votes || 1; // Get max votes allowed
+    
+            let updatedVotes;
+    
+            if (positionVotes.includes(candidateId)) {
+                // If already selected, remove it (toggle off)
+                updatedVotes = positionVotes.filter((id) => id !== candidateId);
+            } else {
+                // If selecting, ensure limit isn't exceeded
+                if (positionVotes.length < maxVotes) {
+                    updatedVotes = [...positionVotes, candidateId];
+                } else {
+                    return prev; // Stop update if max votes reached
+                }
+            }
+    
+            return {
+                ...prev,
+                [voterId]: {
+                    ...voterVotes,
+                    [positionId]: updatedVotes, // Update specific position's votes
+                },
+            };
+        });
     };
+    
+    
+    
     
 
     // const handleSubmitVotes = async () => {
-    //     try {
-    //         const payload = Object.keys(selectedVotes).map((voterId) => ({
-    //             voter_id: voterId,
-    //             candidate_id: selectedVotes[voterId][0], // Since only one candidate per voter
-    //             num_votes: 1, // Each voter can vote once
-    //         }));
+    //     console.log("Submitting votes:", selectedVotes);
     
-    //         const response = await axiosInstance.post("/submit-votes", { votes: payload });
+    //     if (Object.keys(selectedVotes).length === 0) {
+    //         Swal.fire({
+    //             icon: "warning",
+    //             title: "No Votes Selected",
+    //             text: "Please select a candidate before submitting.",
+    //         });
+    //         return;
+    //     }
+    
+    //     const formattedVotes = Object.entries(selectedVotes).map(([voterId, candidateIds]) => ({
+    //         voter_id: voterId,
+    //         candidate_ids: Array.isArray(candidateIds) ? candidateIds : [candidateIds], // Ensure array
+    //     }));
+    
+    //     console.log("Formatted Votes:", formattedVotes);
+    
+    //     try {
+    //         const response = await axiosInstance.post("/submit-votes", { votes: formattedVotes });
     
     //         if (response.status === 200) {
-    //             alert("Votes submitted successfully!");
-    //             setSelectedVotes({}); // Reset selections after submission
+    //             // alert("Votes submitted successfully!");
+    //             Swal.fire({
+    //                 icon: "success",
+    //                 title: "Success!",
+    //                 text: "Votes submitted successfully!",
+    //                 confirmButtonColor: "#4CAF50", // Green button
+    //             });
+    //             setSelectedVotes({}); // Clear selected votes
+    //         } else {
+    //             Swal.fire({
+    //                 icon: "error",
+    //                 title: "An error occurred.",
+    //                 text: "An error occurred while submitting votes. Please try again.",
+    //             });
     //         }
     //     } catch (error) {
     //         console.error("Error submitting votes:", error);
-    //         alert("Failed to submit votes. Please try again.");
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Submission Failed",
+    //             text: "An error occurred while submitting votes. Please try again.",
+    //         });
     //     }
     // };
-    
-
- 
     const handleSubmitVotes = async () => {
         console.log("Submitting votes:", selectedVotes);
     
-        if (Object.keys(selectedVotes).length === 0) {
+        // Convert selectedVotes into the correct format
+        const formattedVotes = Object.entries(selectedVotes).map(([voterId, positions]) => ({
+            voter_id: voterId,
+            candidate_ids: Object.values(positions).flat() // Flatten the candidate IDs array
+        }));
+    
+        if (formattedVotes.length === 0 || formattedVotes.every(vote => vote.candidate_ids.length === 0)) {
             Swal.fire({
                 icon: "warning",
                 title: "No Votes Selected",
-                text: "Please select a candidate before submitting.",
+                text: "Please select at least one candidate before submitting.",
             });
             return;
         }
-    
-        const formattedVotes = Object.entries(selectedVotes).map(([voterId, candidateIds]) => ({
-            voter_id: voterId,
-            candidate_ids: Array.isArray(candidateIds) ? candidateIds : [candidateIds], // Ensure array
-        }));
     
         console.log("Formatted Votes:", formattedVotes);
     
@@ -308,18 +207,17 @@ const Survey = () => {
             const response = await axiosInstance.post("/submit-votes", { votes: formattedVotes });
     
             if (response.status === 200) {
-                // alert("Votes submitted successfully!");
                 Swal.fire({
                     icon: "success",
                     title: "Success!",
                     text: "Votes submitted successfully!",
-                    confirmButtonColor: "#4CAF50", // Green button
+                    confirmButtonColor: "#4CAF50",
                 });
-                setSelectedVotes({}); // Clear selected votes
+                setSelectedVotes({}); // Clear selected votes after submission
             } else {
                 Swal.fire({
                     icon: "error",
-                    title: "An error occurred.",
+                    title: "Submission Failed",
                     text: "An error occurred while submitting votes. Please try again.",
                 });
             }
@@ -336,6 +234,8 @@ const Survey = () => {
     
     
     
+    
+    
 
   
 
@@ -347,19 +247,6 @@ const Survey = () => {
             selector: (row) => precinctNumbers.find(p => p.id === row.precinct_num_id)?.precinct_num || "Unknown",
             sortable: true,
         },
-        // {
-        //     name: "Voter Name",
-        //     selector: (row) => row.voter_name,
-        //     cell: (row) => (
-        //         <div
-        //             className={`p-2 rounded ${
-        //                 votedVoters.includes(row.id) ? "bg-green-200 text-green-800" : ""
-        //             }`}
-        //         >
-        //             {row.voter_name}
-        //         </div>
-        //     ),
-        // },
         
         {
             name: "Voter Name",
@@ -399,38 +286,74 @@ const Survey = () => {
             sortable: true,
         },
 
+        // {
+        //     name: "Candidates",
+        //     cell: (row) => (
+        //         <div className="flex flex-wrap gap-2">
+        //             {candidates.length > 0 ? (
+        //                 candidates.map((candidate) => {
+        //                     const isSelected = selectedVotes[row.id] === candidate.id;
+        //                     const candidateColor = candidateColorMap[candidate.id] || "#bdc3c7"; // Default gray
+                            
+        //                     return (
+        //                         <label key={candidate.id} className="flex items-center gap-1 p-2 rounded"
+        //                         style={{
+        //                             backgroundColor: candidateColor,
+        //                             color: "white",
+        //                             opacity: isSelected ? 1 : 0.5, // Highlight selected, dim others
+        //                         }}>
+        //                             <input
+        //                                 type="checkbox"
+        //                                 checked={isSelected}
+        //                                 onChange={() => handleCandidateSelection(row.id, candidate.id)}
+        //                                 disabled={selectedVotes[row.id] && !isSelected || votedVoters.includes(row.id)} // Disable other checkboxes if one is selected
+        //                             />
+        //                             {candidate.candidate_name}
+        //                         </label>
+        //                     );
+        //                 })
+        //             ) : (
+        //                 <span className="text-gray-500">No candidates available</span>
+        //             )}
+        //         </div>
+        //     ),
+        // },
         {
             name: "Candidates",
-            cell: (row) => (
-                <div className="flex flex-wrap gap-2">
-                    {candidates.length > 0 ? (
-                        candidates.map((candidate) => {
-                            const isSelected = selectedVotes[row.id] === candidate.id;
-                            const candidateColor = candidateColorMap[candidate.id] || "#bdc3c7"; // Default gray
-                            
+            cell: (row) => {
+                return (
+                    <div className="flex flex-wrap gap-2">
+                        {candidates.map((candidate) => {
+                            const position = positions.find((p) => p.id === candidate.position_id);
+                            const maxVotes = position?.max_votes || 1;
+                            const selectedCandidateIds = selectedVotes[row.id]?.[candidate.position_id] || [];
+        
+                            const isSelected = selectedCandidateIds.includes(candidate.id);
+                            const candidateColor = candidateColorMap[candidate.id] || "#bdc3c7";
+        
                             return (
                                 <label key={candidate.id} className="flex items-center gap-1 p-2 rounded"
-                                style={{
-                                    backgroundColor: candidateColor,
-                                    color: "white",
-                                    opacity: isSelected ? 1 : 0.5, // Highlight selected, dim others
-                                }}>
+                                    style={{
+                                        backgroundColor: candidateColor,
+                                        color: "white",
+                                        opacity: isSelected ? 1 : 0.5,
+                                    }}>
                                     <input
                                         type="checkbox"
                                         checked={isSelected}
-                                        onChange={() => handleCandidateSelection(row.id, candidate.id)}
-                                        disabled={selectedVotes[row.id] && !isSelected || votedVoters.includes(row.id)} // Disable other checkboxes if one is selected
+                                        onChange={() => handleCandidateSelection(row.id, candidate.id, candidate.position_id)}
+                                        disabled={selectedCandidateIds.length >= maxVotes && !isSelected} 
                                     />
                                     {candidate.candidate_name}
                                 </label>
                             );
-                        })
-                    ) : (
-                        <span className="text-gray-500">No candidates available</span>
-                    )}
-                </div>
-            ),
+                        })}
+                    </div>
+                );
+            },
         },
+        
+        
         
         
     

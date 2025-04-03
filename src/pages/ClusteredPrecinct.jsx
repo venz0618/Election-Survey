@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import DataTable from "react-data-table-component";
 import axiosInstance from "../utils/axiosInstance";
 
 const ClusteredPrecinct = () => {
@@ -10,6 +10,8 @@ const ClusteredPrecinct = () => {
     const [clusteredStatus, setClusteredStatus] = useState(0);
     const [editingClusteredPrecinct, setEditingClusteredPrecinct] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");  // ✅ Add this line
+
 
     useEffect(() => {
         fetchClusteredPrecincts();
@@ -63,11 +65,23 @@ const ClusteredPrecinct = () => {
                     barangay_id: barangayId,
                     clustered_status: clusteredStatus,
                 });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Clustered Precinct Edited successfully!",
+                    confirmButtonColor: "#4CAF50", // Green button
+                });
             } else {
                 await axiosInstance.post("/clustered-precincts", {
                     clustered_precinct_num: clusteredPrecinctNum,
                     barangay_id: barangayId,
                     clustered_status: clusteredStatus,
+                });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Clustered Precinct Edited successfully!",
+                    confirmButtonColor: "#4CAF50", // Green button
                 });
             }
             fetchClusteredPrecincts();
@@ -85,8 +99,59 @@ const ClusteredPrecinct = () => {
             } catch (error) {
                 console.error("Error deleting clustered precinct:", error);
             }
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Clustered Precinct Edited successfully!",
+                confirmButtonColor: "#4CAF50", // Green button
+            });
         }
     };
+
+
+    const columns = [
+        {
+            name: "Clustered Precinct",
+            selector: (row) => row.clustered_precinct_num,
+            sortable: true,
+        },
+
+        {
+            name: "Barangay Name",
+            selector: (row) =>barangays.find(barangay => barangay.id === row.barangay_id)?.barangay_name || "Unknown",
+            sortable: true,
+        },
+        {
+            name: "Status",
+            selector: (row) => row.clustered_status === 1 ? "Active" : "Inactive",
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row) => (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => openModal(row)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                        Edit
+                    </button>
+    
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ),
+        }
+    ];
+
+    // // ✅ Filter voters based on search input
+    // const filteredClustered = clusteredPrecincts.filter((precinct) =>
+    //     precinct.clustered_precinct_num.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
 
     return (
         <div className="p-6">
@@ -96,45 +161,22 @@ const ClusteredPrecinct = () => {
                 + Add Clustered Precinct
             </button>
 
-            <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border border-gray-300 p-2">ID</th>
-                        <th className="border border-gray-300 p-2">Clustered Precinct Number</th>
-                        <th className="border border-gray-300 p-2">Barangay</th>
-                        <th className="border border-gray-300 p-2">Status</th>
-                        <th className="border border-gray-300 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {clusteredPrecincts.map((precinct) => (
-                        <tr key={precinct.id}>
-                            <td className="border border-gray-300 p-2">{precinct.id}</td>
-                            <td className="border border-gray-300 p-2">{precinct.clustered_precinct_num}</td>
-                            <td className="border border-gray-300 p-2">{precinct.barangay_name}
-                            {barangays.find(barangay => barangay.id === precinct.barangay_id)?.barangay_name || "Unknown"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                {precinct.clustered_status ? "Active" : "Inactive"}
-                            </td>
-                            <td className="border border-gray-300 p-2">
-                                <button
-                                    onClick={() => openModal(precinct)}
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(precinct.id)}
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+             {/* ✅ Search Bar */}
+             <input
+                    type="text"
+                    placeholder="Search voter name..."
+                    className="border px-3 py-2 mb-4 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            <DataTable
+                    columns={columns}
+                    data={clusteredPrecincts} // ✅ Use filtered data
+                    pagination
+                    highlightOnHover
+                    striped
+                    dense
+                />
 
             {/* Modal */}
             {showModal && (
