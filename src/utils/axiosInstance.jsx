@@ -2,7 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const axiosInstance = axios.create({
-    baseURL: "https://https://6ca5-143-44-192-49.ngrok-free.app/api",    //http://127.0.0.1:8000
+    baseURL: "//https://6ca5-143-44-192-49.ngrok-free.app/api",    //http://127.0.0.1:8000
 });
 
 // Attach token automatically
